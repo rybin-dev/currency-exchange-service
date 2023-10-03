@@ -1,10 +1,12 @@
 package com.rybindev.currencyexchangeservice.servlet;
 
 import com.github.cliftonlabs.json_simple.JsonObject;
+import com.rybindev.currencyexchangeservice.CurrencyRunner;
 import com.rybindev.currencyexchangeservice.exception.BadRequestException;
 import com.rybindev.currencyexchangeservice.mapper.CurrencyDtoJsonConverter;
 import com.rybindev.currencyexchangeservice.model.CurrencyDto;
 import com.rybindev.currencyexchangeservice.service.CurrencyService;
+import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,11 +15,22 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 
 @WebServlet("/currencies/*")
 public class CurrencyServlet extends HttpServlet {
     private final CurrencyService currencyService = CurrencyService.getInstance();
     private final CurrencyDtoJsonConverter currencyDtoJsonConverter = CurrencyDtoJsonConverter.getInstance();
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        try {
+            CurrencyRunner.main(new String[1]);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        super.init(config);
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
